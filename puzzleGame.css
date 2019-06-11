@@ -1,0 +1,19 @@
+@charset "utf-8";
+*{padding:0;margin:0;}
+li{list-style: none;}
+body{background:#FFFFE0;}
+
+#wrap{width:530px;height:500px;margin:50px auto;}
+
+/* 左侧选项栏 */
+#wrap #left{float:left;padding-top:20px;font-size:18px}
+/*#wrap #left ul{width:200px;height:480px;}*/
+/* 开始游戏与难度选择的统一样式 */
+#wrap #left ul li{width:100px;height:50px;line-height:50px;padding-left:10px;position:relative;}
+#wrap #left ul li button{display:block;width:80px;height:40px;line-height:40px;text-align:center;cursor:pointer;margin:5px 20px 0 0;background:#FFF8DC;border-right:solid 1px #aaa;border-bottom:solid 1px #aaa;position:absolute;top:0;}
+
+/* 右侧图片 */
+#wrap #right{float:left;width:300px;height:480px;border:1px solid #000000}
+#wrap #right #imgArea{width:300px;height:480px;position:relative;}
+#wrap #right #imgArea canvas.imgCell{float:left;width:73px;height:73px;border-radius:4px;position:absolute;z-index:10;box-shadow:0px 0px 8px #fff;transition-property:background-position;transition-duration:300ms;transition-timing-function:ease-in-out;}
+#wrap #right #imgArea canvas.hover{filter: alpha(opacity=80);opacity:.8;box-shadow: 0px 0px 8px #000;z-index:20;*border:1px solid #09F;}
