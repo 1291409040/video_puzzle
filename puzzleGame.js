@@ -378,7 +378,7 @@ puzzleGame.prototype = {
 }
 
 window.onload=function(){
-	document.getElementById("loading").style.visibility = "hidden";
+	document.getElementById("loading").style.display = "none";
     document.getElementById("wrap").style.visibility = "visible";
 	var pg = new puzzleGame({'img':'ready.png'});
 }
