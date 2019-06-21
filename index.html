@@ -3,34 +3,32 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>puzzle demo</title>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css'>
+<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.staticfile.org/ionicons/2.0.1/css/ionicons.min.css">
 <link rel="stylesheet" href="puzzleGame.css" />
-<script async src="opencv.js" type="text/javascript"></script>
-<script type="text/javascript" src="jquery-1.9.1.min.js"></script>
-<script type="text/javascript" src="puzzleGame.js"></script>
 </head>
 
 <body>
-    <div id="loading" class="loader-inner">
-		<div class="loader-line-wrap">
-			<div class="loader-line"></div>
-		</div>
-		<div class="loader-line-wrap">
-			<div class="loader-line"></div>
-		</div>
-		<div class="loader-line-wrap">
-			<div class="loader-line"></div>
-		</div>
-		<div class="loader-line-wrap">
-			<div class="loader-line"></div>
-		</div>
-		<div class="loader-line-wrap">
-			<div class="loader-line"></div>
-		</div>
-	</div>
-
-	<div id="wrap" style="visibility:hidden;">
-		<div id="left">
-			<ul>
+	<div id="wrap">
+        <div id="loading" class="loader-inner">
+            <div class="loader-line-wrap">
+                <div class="loader-line"></div>
+            </div>
+            <div class="loader-line-wrap">
+                <div class="loader-line"></div>
+            </div>
+            <div class="loader-line-wrap">
+                <div class="loader-line"></div>
+            </div>
+            <div class="loader-line-wrap">
+                <div class="loader-line"></div>
+            </div>
+            <div class="loader-line-wrap">
+                <div class="loader-line"></div>
+            </div>
+        </div>
+		<div id="control" style="visibility:hidden;">
+			<ul id="buttons">
 				<li id="level">
 					<button id="0">初级</button>
 				</li>
@@ -46,17 +44,31 @@
                 <li id="level">
 					<button id="4">骨灰</button>
 				</li>
-                <li id="follow">
-					<button disabled="disabled">关注ta</button>
-				</li>
-                <li id="step">步数：0</li>
-                <li id="time">时间：0</li>
 			</ul>
+            <div id="user_info" style="visibility:hidden;">
+                <div id="avatar">
+                    <div id="avatar_border"><img src="photo.jpeg"></div>
+                    <span id="plusButton"><i class="fas fa-plus"></i></span>
+                </div>
+                <div id="user_desc">
+                    <p id="u_name">@一路向北</p>
+                    <p id="u_desc">谦谦君子,温润如玉,静若处子,动如脱兔</p>
+                </div>
+            </div>
 		</div>
-		<div id="right">
-			<div id="imgArea"></div>
-            <video width="300" height="480" id="video"></video>
+		<div id="media" style="visibility:hidden;">
+            <div id="progress" style="visibility:hidden;">
+                <div id="move"><i class="icon ion-android-hand"></i><span id="move_t">0</span></div>
+                <div id="time"><i class="icon ion-ios-stopwatch"></i><span id="time_t">0</span></div>
+                <div id="coin"><i class="icon ion-lock-combination"></i><span id="coin_t">12</span></div>
+            </div>
+			<div id="imgArea" style="display: none"></div>
+            <video width="360" height="640" id="video" Src="./new-tvc_889b57b.mp4" autoplay="autoplay" muted="muted" loop="loop"></video>
 		</div>
 	</div>
+    <script async src="opencv.js" type="text/javascript"></script>
+    <script type="text/javascript" src="jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="mo.min.js"></script>
+    <script type="text/javascript" src="puzzleGame.js"></script>
 </body>
 </html>

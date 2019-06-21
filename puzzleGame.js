@@ -3,24 +3,22 @@
  * @param  {[json格式]} param [图片 路径+名称]
  * @return       [无]
  */
-var puzzleGame = function(param){
+var puzzleGame = function(){
 /************* 参数处理 ******************/
-	this.img = param.img;
 	this.cap = null;
 	this.src = null;
 
 /************* 节点 ******************/
-	this.btnReset = $('#wrap #left ul #reset button');//复原游戏按钮
-	this.btnLevel = $('#wrap #left ul #level button');//难度选择按钮
-	this.btnFollow = $('#wrap #left ul #follow button');//关注按钮
-	this.imgArea = $('#wrap #right #imgArea');//图片显示区域
+	this.btnLevel = $('#wrap #control ul #level button');//难度选择按钮
+	this.btnFollow = $('#wrap #control ul #follow button');//关注按钮
+	this.imgArea = $('#wrap #media #imgArea');//图片显示区域
 	this.imgCells = '';//用于记录碎片节点的变量
 
 /************* 变量 ******************/	
 	this.imgOrigArr = [];//图片拆分后，存储正确排序的数组
 	this.imgRandArr = [];//图片打乱顺序后，存储当前排序的数组
 
-	this.levelArr = [[4,3],[5,4],[6,5],[7,6],[10,8]];//存储难度等级的数组
+	this.levelArr = [[3,2],[4,3],[5,4],[6,5],[8,6]];//存储难度等级的数组
 	this.levelNow = 0;//表示当前难度等级的变量，与难度数组结合使用
 
 	//图片整体的宽高
@@ -34,6 +32,8 @@ var puzzleGame = function(param){
 	this.seconds = 0;//记录用时
 	this.timer = null;
 	this.moveTime = 300;//记录animate动画的运动时间，默认100毫秒
+
+	this.anim_timeline = new mojs.Timeline();
 	
 	//调用初始化函数，拆分图片,绑定按钮功能
 	this.init();
@@ -52,7 +52,7 @@ puzzleGame.prototype = {
 	init:function(){
 		this.imgSplit();
 		this.levelSelect();
-		this.gameReset();
+		this.init_anim();
 	},
 
 	startCamera:async function() {
@@ -123,112 +123,98 @@ puzzleGame.prototype = {
 					'height':(this.cellHeight - 1) + 'px',
 					'left':j * this.cellWidth + 'px',
 					'top':i * this.cellHeight + 'px',
-					"background":"url('"+this.img+"')",
 					'backgroundPosition':(-j)*this.cellWidth + 'px ' + (-i)*this.cellHeight + 'px'
 				});
 				this.imgArea.append(cell);
 			}
 		}
-		this.imgCells = $('#wrap #right #imgArea canvas.imgCell');//碎片节点
+		this.imgCells = $('#wrap #media #imgArea canvas.imgCell');//碎片节点
 	},
 
 	timeCnt:function(){
 		var self = this;
 		self.seconds ++;
-		document.getElementById("time").innerText = "时间：" + self.seconds;
+		document.getElementById("progress").style.visibility = "visible";
+		document.getElementById("time_t").innerText = self.seconds;
+	},
+
+	puzzleStart:function(level_id){
+		var self = this;
+
+		self.steps = 0;
+		self.seconds = 0;
+		clearInterval(self.timer);
+		self.timer = setInterval(self.timeCnt.bind(self), 1000);
+
+		document.getElementById("loading").style.display = "none";
+		document.getElementById("media").style.visibility = "visible";
+		document.getElementById("imgArea").style.display = "block";
+		document.getElementById("video").style.display = "none";
+
+		self.src = new cv.Mat(self.imgHeight, self.imgWidth, cv.CV_8UC4);
+
+		self.startCamera();
+
+		//内容改变
+		self.levelNow = parseInt(level_id);
+		//图片重新拆分(先重新计算宽高)
+		self.cellWidth = self.imgWidth/self.levelArr[self.levelNow][1];
+		self.cellHeight = self.imgHeight/self.levelArr[self.levelNow][0];
+		self.imgSplit();
+
+		//打乱图片
+		self.randomArr();
+		self.cellOrder(self.imgRandArr);
+
+		//图片事件
+		self.imgCells.css({
+			'cursor':'pointer'
+		}).bind('mouseover',function(){
+			$(this).addClass('hover');
+		}).bind('mouseout',function(){
+			$(this).removeClass('hover');
+		}).bind('mousedown',function(e){
+			/*此处是图片移动*/
+			$(this).css('cursor','move');
+
+			//所选图片碎片的下标以及鼠标相对该碎片的位置
+			var cellIndex_1 = $(this).index();
+			var cell_mouse_x = e.pageX - self.imgCells.eq(cellIndex_1).offset().left;
+			var cell_mouse_y = e.pageY - self.imgCells.eq(cellIndex_1).offset().top;
+
+			$(document).bind('mousemove',function(e2){
+				self.imgCells.eq(cellIndex_1).css({
+					'z-index':'40',
+					'left':(e2.pageX - cell_mouse_x - self.imgArea.offset().left) + 'px',
+					'top':(e2.pageY - cell_mouse_y - self.imgArea.offset().top) + 'px'
+				});
+			}).bind('mouseup',function(e3){
+				//被交换的碎片下标
+				var cellIndex_2 = self.cellChangeIndex((e3.pageX-self.imgArea.offset().left),(e3.pageY-self.imgArea.offset().top),cellIndex_1);
+
+				//碎片交换
+				if(cellIndex_1 == cellIndex_2){
+					self.cellReturn(cellIndex_1);
+				}else{
+					self.cellExchange(cellIndex_1,cellIndex_2);
+				}
+
+				//移除绑定
+				$(document).unbind('mousemove').unbind('mouseup');
+			});
+		}).bind('mouseup',function(){
+			$(this).css('cursor','pointer');
+		});
 	},
 
 	levelSelect:function(){
 		var self = this;
 		this.btnLevel.bind('click',function(){
-			self.btnFollow.attr("disabled","disabled");
-			self.steps = 0;
-			self.seconds = 0;
-			clearInterval(self.timer);
-			document.getElementById("step").innerText = "步数：0";
-			document.getElementById("time").innerText = "时间：0";
-			self.timer = setInterval(self.timeCnt.bind(self), 1000);
-
-			document.getElementById("imgArea").style.display = "block";
-			document.getElementById("video").style.display = "none";
-
-			self.src = new cv.Mat(self.imgHeight, self.imgWidth, cv.CV_8UC4);
-
-			self.startCamera();
-
-			//内容改变
-			self.levelNow = parseInt($(this).attr('id'));
-			//图片重新拆分(先重新计算宽高)
-			self.cellWidth = self.imgWidth/self.levelArr[self.levelNow][1];
-			self.cellHeight = self.imgHeight/self.levelArr[self.levelNow][0];
-			self.imgSplit();
-
-			//打乱图片
-			self.randomArr();
-			self.cellOrder(self.imgRandArr);
-
-			//图片事件
-			self.imgCells.css({
-				'cursor':'pointer'
-			}).bind('mouseover',function(){
-				$(this).addClass('hover');
-			}).bind('mouseout',function(){
-				$(this).removeClass('hover');
-			}).bind('mousedown',function(e){
-				/*此处是图片移动*/
-				$(this).css('cursor','move');
-
-				//所选图片碎片的下标以及鼠标相对该碎片的位置
-				var cellIndex_1 = $(this).index();
-				var cell_mouse_x = e.pageX - self.imgCells.eq(cellIndex_1).offset().left;
-				var cell_mouse_y = e.pageY - self.imgCells.eq(cellIndex_1).offset().top;
-
-				$(document).bind('mousemove',function(e2){
-					self.imgCells.eq(cellIndex_1).css({
-						'z-index':'40',
-						'left':(e2.pageX - cell_mouse_x - self.imgArea.offset().left) + 'px',
-						'top':(e2.pageY - cell_mouse_y - self.imgArea.offset().top) + 'px'
-					});
-				}).bind('mouseup',function(e3){
-					//被交换的碎片下标
-					var cellIndex_2 = self.cellChangeIndex((e3.pageX-self.imgArea.offset().left),(e3.pageY-self.imgArea.offset().top),cellIndex_1);
-
-					//碎片交换
-					if(cellIndex_1 == cellIndex_2){
-						self.cellReturn(cellIndex_1);
-					}else{
-						self.cellExchange(cellIndex_1,cellIndex_2);
-					}
-
-					//移除绑定
-					$(document).unbind('mousemove').unbind('mouseup');
-				});
-			}).bind('mouseup',function(){
-				$(this).css('cursor','pointer');
-			});
-		});
-	},
-
-	/**
-	 * [gameStart 开始/回复 游戏的函数]
-	 * @return [无]
-	 */
-	gameReset:function(){
-		var self = this;
-		this.btnReset.bind('click',function(){
-			//复原图片
-			self.cellOrder(self.imgOrigArr);
-			//取消事件绑定
-			self.imgCells.css('cursor','default').unbind('mouseover').unbind('mouseout').unbind('mousedown');
-
-			// document.getElementById("imgArea").style.display = "none";
-			// document.getElementById("video").style.display = "block";
-			self.steps = 0;
-			self.seconds = 0;
-			clearInterval(self.timer);
-			document.getElementById("step").innerText = "步数：0";
-			document.getElementById("time").innerText = "时间：0";
-			self.btnFollow.disabled = "disabled";
+			document.getElementById("control").style.visibility = "hidden";
+			document.getElementById("buttons").style.visibility = "hidden";
+			document.getElementById("loading").style.display = "block";
+			document.getElementById("media").style.visibility = "hidden";
+			setTimeout(self.puzzleStart.bind(self, $(this).attr('id')),1000);
 		});
 	},
 
@@ -325,7 +311,7 @@ puzzleGame.prototype = {
 			}
 		});
 		self.steps ++;
-		document.getElementById("step").innerText = "步数：" + self.steps;
+		document.getElementById("move_t").innerText = self.steps;
 	},
 
 	/**
@@ -363,6 +349,7 @@ puzzleGame.prototype = {
 	 * @return [description]
 	 */
 	success:function(){
+		var self = this;
 		//取消样式和事件绑定
 		for(var i=0,len=this.imgOrigArr.length;i<len;i++){
 			if(this.imgCells.eq(i).has('mouseOn')){
@@ -374,13 +361,72 @@ puzzleGame.prototype = {
 		document.getElementById("video").style.display = "block";
 		clearInterval(this.timer);
 		this.btnFollow.removeAttr("disabled");
+		self.anim_timeline.start();
+		document.getElementById("control").style.visibility = "visible";
+		document.getElementById("user_info").style.visibility = "visible";
+		document.getElementById("coin_t").innerText = 12 + (self.levelNow+1)*(self.levelNow+1);
+	},
+
+	init_anim:function(){
+		var self = this;
+
+		var canvas_ = document.getElementById("media");
+		var options = {
+			tweens : [
+				// burst animation
+				new mojs.Burst({
+					parent: canvas_,
+					duration: 1600,
+					delay: 300,
+					shape : 'circle',
+					fill: '#F88ADE',
+					x: '50%',
+					y: '45%',
+					opacity: 0.6,
+					childOptions: { radius: {'rand(20,5)':0} },
+					radius: {50:110},
+					count: 20,
+					isSwirl: true,
+					swirlSize: 1,
+					isRunLess: true,
+					easing: mojs.easing.bezier(0.1, 1, 0.3, 1)
+				}),
+				// burst animation
+				new mojs.Burst({
+					parent: canvas_,
+					duration: 1800,
+					delay: 600,
+					shape : 'circle',
+					fill: '#FFFADF',
+					x: '50%',
+					y: '45%',
+					opacity: 0.6,
+					childOptions: {
+						radius: {'rand(20,5)':0},
+						type: 'line',
+						stroke: '#988ADE',
+						strokeWidth: 2
+					},
+					angle: {0:10},
+					radius: {140:160},
+					count: 38,
+					isRunLess: true,
+					easing: mojs.easing.bezier(0.1, 1, 0.3, 1)
+				}),
+			],
+		};
+
+		for(var i = 0, len = options.tweens.length; i < len; ++i) {
+			self.anim_timeline.add(options.tweens[i]);
+		}
 	}
 }
 
 window.onload=function(){
 	document.getElementById("loading").style.display = "none";
-    document.getElementById("wrap").style.visibility = "visible";
-	var pg = new puzzleGame({'img':'ready.png'});
+    document.getElementById("control").style.visibility = "visible";
+    document.getElementById("media").style.visibility = "visible";
+	var pg = new puzzleGame();
 }
 
 

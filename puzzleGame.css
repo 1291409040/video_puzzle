@@ -1,27 +1,36 @@
-@charset "utf-8";
-*{padding:0;margin:0;}
-li{list-style: none;}
-body{background:#FFFFE0;}
-
-#wrap{width:530px;height:500px;margin:50px auto;}
-
-/* 左侧选项栏 */
-#wrap #left{float:left;padding-top:20px;font-size:18px}
-/*#wrap #left ul{width:200px;height:480px;}*/
-/* 开始游戏与难度选择的统一样式 */
-#wrap #left ul li{width:100px;height:50px;line-height:50px;padding-left:10px;position:relative;}
-#wrap #left ul li button{display:block;width:80px;height:40px;line-height:40px;text-align:center;cursor:pointer;margin:5px 20px 0 0;background:#FFF8DC;border-right:solid 1px #aaa;border-bottom:solid 1px #aaa;position:absolute;top:0;}
-
-/* 右侧图片 */
-#wrap #right{float:left;width:300px;height:480px;border:1px solid #000000}
-#wrap #right #imgArea{width:300px;height:480px;position:relative;}
-#wrap #right #imgArea canvas.imgCell{float:left;width:73px;height:73px;border-radius:4px;position:absolute;z-index:10;box-shadow:0px 0px 8px #fff;transition-property:background-position;transition-duration:300ms;transition-timing-function:ease-in-out;}
-#wrap #right #imgArea canvas.hover{filter: alpha(opacity=80);opacity:.8;box-shadow: 0px 0px 8px #000;z-index:20;*border:1px solid #09F;}
-
-
-/* loader */
 *{margin:0;padding:0;}
 body{background-color: #000;}
+
+#wrap{width:360px;height:640px;margin:50px auto;}
+
+/* 按钮 */
+#wrap #control{width:360px;height:640px;position:absolute;padding-top:100px;z-index:50;opacity: 0.75}
+#wrap #control ul li{padding-left:100px;padding-top:30px;position:relative;}
+#wrap #control ul li button{width:150px;height: 35px;font-size: 20px;color: white;background: #6225E6;box-shadow: 10px 7px 0 #FBC638;-webkit-transform: skewX(-15deg);transform: skewX(-15deg);}
+
+/* user info */
+#wrap #control #user_info{color: #FFFFFF;padding-left:20px;padding-top:150px;}
+#wrap #control #user_info #u_name{font-size: 15px;}
+#wrap #control #user_info #u_desc{font-size: 10px;padding-top: 3px;}
+#wrap #control #avatar_border {position: absolute;width: 45px;height: 45px;border: 2px solid #eee;border-radius: 50%;overflow: hidden;}
+#wrap #control #avatar_border img {width: 45px;height: 45px;}
+#wrap #control #user_info #plusButton {position: absolute;margin-left:25px;margin-top:18px;border-radius: 50%;background-color: #ec6565;width: 40px;height: 40px;transform: scale(0.5);color: white;display: flex;align-items: center;justify-content: center;font-size: 20px;}
+#wrap #control #user_info #avatar {position: absolute;}
+#wrap #control #user_info #user_desc {position: absolute;padding-left:60px;padding-top:4px;}
+
+/* 图片碎片 */
+#wrap #media{position:relative;width:360px;height:640px;border:1px solid #000000}
+#wrap #media #imgArea{width:360px;height:640px;position:relative;}
+#wrap #media #imgArea canvas.imgCell{float:left;width:73px;height:73px;border-radius:4px;position:absolute;z-index:10;box-shadow:0px 0px 8px #fff;transition-property:background-position;transition-duration:300ms;transition-timing-function:ease-in-out;}
+#wrap #media #imgArea canvas.hover{filter: alpha(opacity=80);opacity:.8;box-shadow: 0px 0px 8px #000;z-index:20;*border:1px solid #09F;}
+#wrap #media #video{opacity: 0.5;}
+
+#wrap #progress{color: #FFFFFF;position: absolute; padding-left: 25%;padding-top: -10px;z-index: 100}
+#wrap #progress div{float: left;padding-right: 25px;}
+#wrap #progress i{font-size: 25px;}
+#wrap #progress span{font-size: 20px;padding-left: 5px;}
+
+/* loader */
 .loader-inner {width: 100px;height: 60px;margin: 100px auto;position: relative;}
 .loader-line-wrap {
     -webkit-animation: spin 2000ms cubic-bezier(.175, .885, .32, 1.275) infinite;
